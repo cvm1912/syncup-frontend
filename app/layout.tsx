@@ -9,9 +9,7 @@ const _geistMono = Geist_Mono({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: 'SyncUp',
   description: 'Real-time coaching feed',
-  icons: {
-    
-  },
+  icons: { icon: "/icon.svg" },
 }
 
 export default function RootLayout({

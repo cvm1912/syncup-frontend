@@ -1,6 +1,7 @@
 "use client"
 
 import { FeedList } from "./components/FeedList"
+import { SocketStatus } from "./components/SocketStatus"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Plus } from "lucide-react"
@@ -15,6 +16,7 @@ export default function HomePage() {
             <p className="text-muted-foreground mt-1">Real-time updates from all posts</p>
           </div>
           <div className="flex items-center gap-4">
+            <SocketStatus />
             <Link href="/admin">
               <Button>
                 <Plus className="w-4 h-4 mr-2" />

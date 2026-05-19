@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react"
 import { Feed, getFeeds } from "@/app/lib/api"
-import { getSocket, disconnectSocket } from "@/app/lib/socket"
+import { getSocket } from "@/app/lib/socket"
 import { FeedCard } from "./FeedCard"
 import { Loader2, AlertCircle, Inbox } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
@@ -32,26 +32,29 @@ export function FeedList() {
   useEffect(() => {
     const socket = getSocket()
 
-    socket.on("feed:created", (feed: Feed) => {
+    const onFeedCreated = (feed: Feed) => {
       setFeeds((prev) => {
         if (prev.some((f) => f.id === feed.id)) return prev
         return [feed, ...prev]
       })
-    })
+    }
 
-    socket.on("feed:updated", ({ id, data }: { id: number; data: Partial<Feed> }) => {
+    const onFeedUpdated = ({ id, data }: { id: number; data: Partial<Feed> }) => {
       setFeeds((prev) => prev.map((f) => (f.id === id ? { ...f, ...data } : f)))
-    })
+    }
 
-    socket.on("feed:deleted", ({ id }: { id: number }) => {
+    const onFeedDeleted = ({ id }: { id: number }) => {
       setFeeds((prev) => prev.filter((f) => f.id !== id))
-    })
+    }
+
+    socket.on("feed:created", onFeedCreated)
+    socket.on("feed:updated", onFeedUpdated)
+    socket.on("feed:deleted", onFeedDeleted)
 
     return () => {
-      socket.off("feed:created")
-      socket.off("feed:updated")
-      socket.off("feed:deleted")
-      disconnectSocket()
+      socket.off("feed:created", onFeedCreated)
+      socket.off("feed:updated", onFeedUpdated)
+      socket.off("feed:deleted", onFeedDeleted)
     }
   }, [])
 

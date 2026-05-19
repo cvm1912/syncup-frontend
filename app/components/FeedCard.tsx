@@ -1,3 +1,5 @@
+"use client"
+
 import { Feed } from "@/app/lib/api"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { formatDistanceToNow } from "date-fns"
@@ -16,6 +18,7 @@ export function FeedCard({ feed }: FeedCardProps) {
           <CardTitle className="text-lg font-semibold">{feed.title}</CardTitle>
           <span className="text-xs text-muted-foreground whitespace-nowrap">{timeAgo}</span>
         </div>
+        <p className="text-xs text-muted-foreground">by {feed.author}</p>
       </CardHeader>
       <CardContent>
         <p className="text-muted-foreground">{feed.content}</p>
