@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   title: 'SyncUp',
   description: 'Real-time coaching feed',
   icons: {
-    icon: '/icon.svg',
+    
   },
 }
 
