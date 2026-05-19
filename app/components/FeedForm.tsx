@@ -12,7 +12,7 @@ import { Loader2, CheckCircle, AlertCircle } from "lucide-react"
 
 export function FeedForm() {
   const [title, setTitle] = useState("")
-  const [description, setDescription] = useState("")
+  const [content, setContent] = useState("")
   const [author, setAuthor] = useState("")
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
@@ -27,12 +27,12 @@ export function FeedForm() {
       setError("Title must be at least 3 characters")
       return false
     }
-    if (!description.trim()) {
-      setError("Description is required")
+    if (!content.trim()) {
+      setError("Content is required")
       return false
     }
-    if (description.trim().length < 10) {
-      setError("Description must be at least 10 characters")
+    if (content.trim().length < 10) {
+      setError("Content must be at least 10 characters")
       return false
     }
     if (!author.trim()) {
@@ -60,12 +60,12 @@ export function FeedForm() {
     try {
       await createFeed({
         title: title.trim(),
-        description: description.trim(),
+        content: content.trim(),
         author: author.trim(),
       })
       setSuccess(true)
       setTitle("")
-      setDescription("")
+      setContent("")
       setAuthor("")
       // Hide success message after 3 seconds
       setTimeout(() => setSuccess(false), 3000)
@@ -122,12 +122,12 @@ export function FeedForm() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Description / Content</Label>
+            <Label htmlFor="content">Content</Label>
             <Textarea
-              id="description"
-              placeholder="Enter post description or content"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              id="content"
+              placeholder="Enter post content"
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
               disabled={loading}
               rows={5}
             />

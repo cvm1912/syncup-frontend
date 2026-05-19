@@ -1,68 +1,61 @@
+const BASE_URL = "https://coaching-feed-l78m.onrender.com/api/v1"
+
 export interface Feed {
-  id: string
+  id: number
   title: string
-  description: string
+  content: string
+  author: string
   createdAt: string
+  updatedAt: string
 }
 
 export interface CreateFeedData {
   title: string
-  description: string
+  content: string
+  author: string
 }
 
-// In-memory store for demo purposes (works without backend)
-let mockFeeds: Feed[] = [
-  {
-    id: "1",
-    title: "Welcome to the Feed",
-    description: "This is a demo of the realtime feed application. New posts will appear here automatically.",
-    createdAt: new Date(Date.now() - 3600000).toISOString(),
-  },
-  {
-    id: "2",
-    title: "Getting Started",
-    description: "Navigate to /admin to create new feed posts. They will appear here in real-time.",
-    createdAt: new Date(Date.now() - 7200000).toISOString(),
-  },
-]
-
-// Event listeners for real-time updates within the same browser
-type FeedListener = (feed: Feed) => void
-const listeners: FeedListener[] = []
-
-export function subscribeToFeeds(callback: FeedListener) {
-  listeners.push(callback)
-  return () => {
-    const index = listeners.indexOf(callback)
-    if (index > -1) listeners.splice(index, 1)
-  }
+export interface UpdateFeedData {
+  title?: string
+  content?: string
+  author?: string
 }
 
-function notifyListeners(feed: Feed) {
-  listeners.forEach((callback) => callback(feed))
+async function handleResponse<T>(res: Response): Promise<T> {
+  const json = await res.json()
+  if (!res.ok) throw new Error(json?.ErrorResponse?.message ?? "Request failed")
+  return json.SuccessResponse.data
 }
 
 export async function getFeeds(): Promise<Feed[]> {
-  // Simulate network delay
-  await new Promise((resolve) => setTimeout(resolve, 300))
-  return [...mockFeeds]
+  const res = await fetch(`${BASE_URL}/feeds`, { cache: "no-store" })
+  return handleResponse<Feed[]>(res)
+}
+
+export async function getFeedById(id: number): Promise<Feed> {
+  const res = await fetch(`${BASE_URL}/feeds/${id}`, { cache: "no-store" })
+  return handleResponse<Feed>(res)
 }
 
 export async function createFeed(data: CreateFeedData): Promise<Feed> {
-  // Simulate network delay
-  await new Promise((resolve) => setTimeout(resolve, 500))
-  
-  const newFeed: Feed = {
-    id: Date.now().toString(),
-    title: data.title,
-    description: data.description,
-    createdAt: new Date().toISOString(),
-  }
-  
-  mockFeeds = [newFeed, ...mockFeeds]
-  
-  // Notify all listeners (simulates socket.io broadcast)
-  notifyListeners(newFeed)
-  
-  return newFeed
+  const res = await fetch(`${BASE_URL}/feeds`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  })
+  return handleResponse<Feed>(res)
+}
+
+export async function updateFeed(id: number, data: UpdateFeedData): Promise<void> {
+  const res = await fetch(`${BASE_URL}/feeds/${id}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  })
+  await handleResponse(res)
+}
+
+export async function deleteFeed(id: number): Promise<void> {
+  const res = await fetch(`${BASE_URL}/feeds/${id}`, { method: "DELETE" })
+  await handleResponse(res)
 }

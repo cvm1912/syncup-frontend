@@ -1,7 +1,8 @@
 "use client"
 
 import { useEffect, useState, useCallback } from "react"
-import { Feed, getFeeds, subscribeToFeeds } from "@/app/lib/api"
+import { Feed, getFeeds } from "@/app/lib/api"
+import { getSocket, disconnectSocket } from "@/app/lib/socket"
 import { FeedCard } from "./FeedCard"
 import { Loader2, AlertCircle, Inbox } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
@@ -15,11 +16,7 @@ export function FeedList() {
     try {
       setError(null)
       const data = await getFeeds()
-      // Sort by newest first
-      const sortedFeeds = data.sort(
-        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      )
-      setFeeds(sortedFeeds)
+      setFeeds(data.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()))
     } catch (err) {
       setError("Failed to load feeds. Please try again later.")
       console.error(err)
@@ -33,20 +30,28 @@ export function FeedList() {
   }, [fetchFeeds])
 
   useEffect(() => {
-    // Subscribe to new feeds (works without socket.io for demo)
-    const unsubscribe = subscribeToFeeds((newFeed: Feed) => {
-      setFeeds((prevFeeds) => {
-        // Prevent duplicates
-        if (prevFeeds.some((feed) => feed.id === newFeed.id)) {
-          return prevFeeds
-        }
-        // Add new feed at the top
-        return [newFeed, ...prevFeeds]
+    const socket = getSocket()
+
+    socket.on("feed:created", (feed: Feed) => {
+      setFeeds((prev) => {
+        if (prev.some((f) => f.id === feed.id)) return prev
+        return [feed, ...prev]
       })
     })
 
+    socket.on("feed:updated", ({ id, data }: { id: number; data: Partial<Feed> }) => {
+      setFeeds((prev) => prev.map((f) => (f.id === id ? { ...f, ...data } : f)))
+    })
+
+    socket.on("feed:deleted", ({ id }: { id: number }) => {
+      setFeeds((prev) => prev.filter((f) => f.id !== id))
+    })
+
     return () => {
-      unsubscribe()
+      socket.off("feed:created")
+      socket.off("feed:updated")
+      socket.off("feed:deleted")
+      disconnectSocket()
     }
   }, [])
 

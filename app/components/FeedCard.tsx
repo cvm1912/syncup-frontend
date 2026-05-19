@@ -18,7 +18,7 @@ export function FeedCard({ feed }: FeedCardProps) {
         </div>
       </CardHeader>
       <CardContent>
-        <p className="text-muted-foreground">{feed.description}</p>
+        <p className="text-muted-foreground">{feed.content}</p>
       </CardContent>
     </Card>
   )

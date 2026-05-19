@@ -2,12 +2,13 @@
 
 import { io, Socket } from "socket.io-client"
 
+const SOCKET_URL = "https://coaching-feed-l78m.onrender.com"
+
 let socket: Socket | null = null
 
 export const getSocket = (): Socket => {
   if (!socket) {
-    const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:3001"
-    socket = io(socketUrl, {
+    socket = io(SOCKET_URL, {
       autoConnect: true,
       reconnection: true,
       reconnectionAttempts: Infinity,
